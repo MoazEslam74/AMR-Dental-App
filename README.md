@@ -28,6 +28,7 @@ The application is tailored for dental and oral health professionals to support 
 
 
 ## 🚀 Getting Started
+*You can try the application directly from the APK directory*
 
 To run this project locally, follow these steps:
 
