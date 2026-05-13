@@ -1,0 +1,144 @@
+class Infection {
+  final String id;
+  final String name;
+  final String img;
+  final List<String> symptoms;
+  final String treatment;
+  final String causingAgent;
+
+  const Infection({
+    required this.id,
+    required this.name,
+    required this.img,
+    required this.symptoms,
+    required this.treatment,
+    required this.causingAgent,
+  });
+}
+
+const Infection oralHerpes = Infection(
+  id: 'oral-herpes',
+  name: 'Oral herpes',
+  img: 'oral_herpes_image.jpg',
+  symptoms: [
+    'Painful blisters on lips or inside mouth',
+    'tingling',
+    'fever',
+  ],
+  treatment: 'Antivirals: Acyclovir, valacyclovir (start early). Pain relief: Lidocaine gel, NSAIDs. Supportive care: Rest, fluids, avoid triggers.',
+  causingAgent: 'Human simplex virus type 1',
+);
+
+const Infection herpangina = Infection(
+  id: 'herpangina',
+  name: 'Herpangina',
+  img: 'herpangina_image.jpg',
+  symptoms: [
+    'Vesicles/ulcers in soft palate',
+    'fever',
+    'sore throat',
+    'loss of appetite (mainly in children)',
+  ],
+  treatment: 'Supportive care only. Pain relief: Paracetamol or ibuprofen. Hydration: Encourage fluids. Soft, non-irritating foods. No antibiotics needed.',
+  causingAgent: 'Coxsackievirus B',
+);
+
+const Infection handFootAndMouthDisease = Infection(
+  id: 'hand-foot-and-mouth-disease',
+  name: 'Hand, foot and mouth disease',
+  img: 'hand_foot_and_mouth_disease_image.jpg',
+  symptoms: [
+    'Painful mouth sores',
+    'skin rash on hands/feet',
+    'fever',
+  ],
+  treatment: 'Supportive care: No specific cure. Pain relief: Paracetamol or ibuprofen. Hydration: Prevent dehydration.',
+  causingAgent: 'Coxsackievirus A16',
+);
+
+const Infection measlesKoplikSpots = Infection(
+  id: 'measles-koplik-spots',
+  name: 'Measles (koplik spots)',
+  img: 'measles_koplik_spots_image.jpg',
+  symptoms: [
+    'White spots inside cheeks',
+    'fever',
+    'cough',
+    'runny nose',
+    'skin rash',
+    'malaise',
+  ],
+  treatment: 'Supportive care: Rest, fluids, manage fever (paracetamol/ibuprofen). Vitamin A: Reduces severity. Isolation: Prevent spread. Monitor for complications: Pneumonia, encephalitis. No antiviral cure — prevention via MMR vaccine is key.',
+  causingAgent: 'Measles virus',
+);
+
+const Infection hivAssociatedOralLesions = Infection(
+  id: 'hiv-associated-oral-lesions',
+  name: 'HIV associated oral lesions',
+  img: 'hiv_associated_oral_lesions_image.jpg',
+  symptoms: [
+    'oral thrush',
+    'hairy leukoplakia',
+    'persistent ulcers',
+    'gingivitis',
+    'periodontitis',
+  ],
+  treatment: 'Antiretroviral therapy (ART) to control HIV; specific treatments for individual lesions such as antifungals for candidiasis, antivirals for herpes-related lesions.',
+  causingAgent: 'HIV 1',
+);
+
+const Infection oralCandidiasis = Infection(
+  id: 'oral-candidiasis',
+  name: 'Oral Candidiasis',
+  img: 'oral_candidiasis_image.jpg',
+  symptoms: [
+    'Creamy white patches on tongue/cheeks and sometimes on the roof of the mouth and tonsils',
+    'Redness',
+    'soreness',
+    'burning',
+  ],
+  treatment: 'Nystatin suspension or clotrimazole lozenges (topical). Fluconazole or itraconazole for severe (systemic). Improve oral hygiene, adjust dentures, clean dentures.',
+  causingAgent: 'Candida albicans',
+);
+
+const Infection angularCheilitis = Infection(
+  id: 'angular-cheilitis',
+  name: 'Angular Cheilitis',
+  img: 'angular_cheilitis_image.jpg',
+  symptoms: [
+    'Fungal or yeast infections in the mouth such as thrush',
+    'Cracks at corners of the mouth',
+    'redness',
+    'pain',
+    'crusting',
+  ],
+  treatment: 'Clotrimazole or miconazole (topical, for candida). Fusidic acid or mupirocin if bacterial infection (topical for Staph aureus) is suspected. Antifungal + steroid (e.g., miconazole + hydrocortisone) for inflammation and infection. Improve denture fit, correct nutritional deficiencies (iron, B12), manage drooling or lip licking.',
+  causingAgent: 'Candida albicans',
+);
+
+const Infection medianRhomboidGlossitis = Infection(
+  id: 'median-rhomboid-glossitis',
+  name: 'Median Rhomboid Glossitis',
+  img: 'median_rhomboid_glossitis_image.jpg',
+  symptoms: [
+    'Smooth red area on mid-tongue',
+    'mild burning',
+  ],
+  treatment: 'fluconazole or clotrimazole. Regular brushing, tongue cleaning. Stop smoking.',
+  causingAgent: 'Candida albicans',
+);
+
+const Infection dentureStomatitis = Infection(
+  id: 'denture-stomatitis',
+  name: 'Denture Stomatitis',
+  img: 'denture_stomatitis_image.jpg',
+  symptoms: [
+    'Redness under dentures',
+    'swelling',
+    'inflammation',
+    'canker sores',
+    'white or red patches on tongue, inner cheeks, lips or gums',
+  ],
+  treatment: 'Nystatin or miconazole gel. Clean dentures daily, soak in antifungal solution (e.g., chlorhexidine or sodium hypochlorite if safe for material). Remove dentures at night to allow mucosa to recover. Adjust ill-fitting dentures if needed. Control diabetes, stop smoking, improve oral hygiene.',
+  causingAgent: 'Candida albicans',
+);
