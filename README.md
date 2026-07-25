@@ -15,7 +15,7 @@ The application is tailored for dental and oral health professionals to support 
 
 ## 📱 Screenshots
 
-> **Note:** Add your screenshots here to showcase the UI/UX.
+> From the real App.
 
 | Symptom Search | Condition Details | Antibiotic Hub |
 | :---: | :---: | :---: |
