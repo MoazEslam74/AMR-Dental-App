@@ -1,10 +1,16 @@
+import 'package:eda_pharma/screens/AI_infection_search_beta.dart';
 import 'package:eda_pharma/screens/about_us.dart';
 import 'package:eda_pharma/screens/antibiotic_search_screen.dart';
 import 'package:eda_pharma/screens/home_screen.dart';
 import 'package:eda_pharma/screens/infection_search_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart'; // أضف هذا السطر
 
-void main() {
+void main() async {
+  // السطرين التاليين هما الحل للمشكلة
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); 
+
   runApp(const MyApp());
 }
 
@@ -47,23 +53,14 @@ class _MyAppState extends State<MyApp> {
           ),
         ),
       ),
-
       initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),
         '/antibiotic': (context) => AntibioticSearchScreen(),
         '/infection': (context) => InfectionSearchScreen(),
         '/about': (context) => AboutUsScreen(),
+        '/beta_chat': (context) => BetaChatScreen(sessionId: 'your_session_id'),
       },
-
-      // home: Scaffold(
-      //   appBar: AppBar(
-      //     title: const Text('Antibiotics App'),
-      //     centerTitle: true,
-      //     backgroundColor: Colors.amber[400],
-      //   ),
-      //   body: FeaturesScreen(),
-      // ),
     );
   }
 }
