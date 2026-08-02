@@ -1,12 +1,9 @@
 import 'dart:convert';
+import 'package:eda_pharma/data/infection_data.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
-
-// استدعاء ملف البيانات الخاص بالأمراض
 import 'package:eda_pharma/model/infection.dart';
-// افترض أنك قمت باستدعاء ملف infection_data_2.dart هنا
-// import 'path/to/infection_data_2.dart'; 
 
 class BetaChatScreen extends StatefulWidget {
   final String sessionId;
