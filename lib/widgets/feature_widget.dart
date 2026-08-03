@@ -1,10 +1,12 @@
+import 'dart:ffi';
+
 import 'package:eda_pharma/screens/about_us.dart';
 import 'package:flutter/material.dart';
 import 'package:eda_pharma/screens/antibiotic_search_screen.dart';
 import 'package:eda_pharma/screens/infection_search_screen.dart';
-
+import 'package:eda_pharma/screens/AI_infection_search_beta.dart';
 class FeatureWidget extends StatelessWidget {
-  const FeatureWidget({
+   FeatureWidget({
     super.key,
     required this.featureColor,
     required this.featureName,
@@ -15,9 +17,11 @@ class FeatureWidget extends StatelessWidget {
   final String featureName;
   final IconData featureIcon;
   final String routeName; // Add this
-
+  final String sessionId = 'S_n_${DateTime.now().millisecondsSinceEpoch}'; // Add this
   Widget _getPage(String routeName) {
     switch (routeName) {
+      case '/beta_chat':
+        return BetaChatScreen(sessionId: sessionId);
       case '/infection':
         return InfectionSearchScreen();
       case '/antibiotic':
