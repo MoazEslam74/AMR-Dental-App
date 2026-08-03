@@ -1,15 +1,18 @@
+import 'package:eda_pharma/firebase_options.dart';
 import 'package:eda_pharma/screens/AI_infection_search_beta.dart';
 import 'package:eda_pharma/screens/about_us.dart';
 import 'package:eda_pharma/screens/antibiotic_search_screen.dart';
 import 'package:eda_pharma/screens/home_screen.dart';
 import 'package:eda_pharma/screens/infection_search_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart'; // أضف هذا السطر
+import 'package:firebase_core/firebase_core.dart'; 
 
 void main() async {
-  // السطرين التاليين هما الحل للمشكلة
+  
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); 
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(const MyApp());
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:eda_pharma/model/infection.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class BetaChatScreen extends StatefulWidget {
   final String sessionId;
@@ -16,7 +17,10 @@ class BetaChatScreen extends StatefulWidget {
 
 class _BetaChatScreenState extends State<BetaChatScreen> {
   final TextEditingController _controller = TextEditingController();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instanceFor(
+  app: Firebase.app(),
+  databaseId: 'default', // هنا نجبر التطبيق على البحث عن الاسم بدون أقواس
+);
   final ScrollController _scrollController = ScrollController();
   bool _isTyping = false; // لإظهار مؤشر التحميل أثناء انتظار الـ API
 
