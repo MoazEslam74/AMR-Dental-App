@@ -125,29 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   //   featureIcon: Icons.search,
                   //   routeName: '/infection',
                   // ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/beta_chat');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.search, color: Colors.white),
-                        SizedBox(width: 10),
-                        Text(
-                          "Search using symptoms",
-                          style: TextStyle(color: Colors.white, fontSize: 18),
-                        ),
-                      ],
-                    ),
-                  ),
+                  
                   FeatureWidget(
                     featureColor: Colors.blue,
                     featureName: "Search using AI",

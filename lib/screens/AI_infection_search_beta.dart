@@ -26,7 +26,9 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
 
   // رابط Vercel الخاص بك
   final String _apiUrl = 'https://medical-diagnostic-agent-two.vercel.app/chat';
-
+// --- المتغيرات الجديدة لحفظ ذاكرة المحادثة (ملف المريض) ---
+  List<String> _accumulatedSymptoms = [];
+  String? _lastAskedSymptom;
   // دالة إرسال الرسالة إلى Firestore ثم إلى الـ API
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
@@ -51,7 +53,7 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
 
       _scrollToBottom();
 
-      // 2. إرسال الطلب إلى Vercel API
+      // 2. إرسال الطلب إلى Vercel API (مع الذاكرة)
       final response = await http.post(
         Uri.parse(_apiUrl),
         headers: {
@@ -61,11 +63,20 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
         body: jsonEncode({
           'user_message': text,
           'session_id': widget.sessionId,
+          // إرسال الأعراض المتراكمة وآخر عرض سأل عنه السيرفر
+          'accumulated_symptoms': _accumulatedSymptoms,
+          'last_asked_symptom': _lastAskedSymptom,
         }),
       );
 
       if (response.statusCode == 200) {
         final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
+        
+        // --- تحديث الذاكرة المحلية بالبيانات القادمة من السيرفر ---
+        setState(() {
+          _accumulatedSymptoms = List<String>.from(decodedResponse['accumulated_symptoms'] ?? []);
+          _lastAskedSymptom = decodedResponse['last_asked_symptom'];
+        });
         
         // 3. حفظ رد الـ Agent في Firestore
         await _firestore
