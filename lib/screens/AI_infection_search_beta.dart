@@ -18,18 +18,25 @@ class BetaChatScreen extends StatefulWidget {
 class _BetaChatScreenState extends State<BetaChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instanceFor(
-  app: Firebase.app(),
-  databaseId: 'default', // هنا نجبر التطبيق على البحث عن الاسم بدون أقواس
-);
+    app: Firebase.app(),
+    databaseId: 'default', // هنا نجبر التطبيق على البحث عن الاسم بدون أقواس
+  );
   final ScrollController _scrollController = ScrollController();
   bool _isTyping = false; // لإظهار مؤشر التحميل أثناء انتظار الـ API
 
   // رابط Vercel الخاص بك
   final String _apiUrl = 'https://medical-diagnostic-agent-two.vercel.app/chat';
-// --- المتغيرات الجديدة لحفظ ذاكرة المحادثة (ملف المريض) ---
+  
+  // --- المتغيرات الجديدة لحفظ ذاكرة المحادثة (ملف المريض) ---
   List<String> _accumulatedSymptoms = [];
   String? _lastAskedSymptom;
-  // دالة إرسال الرسالة إلى Firestore ثم إلى الـ API
+  
+  // الألوان الأساسية للتصميم الجديد
+  final Color bgColor = const Color(0xFFF4F7FC);
+  final Color primaryBlue = const Color(0xFF1976D2);
+  final Color darkText = const Color(0xFF102A43);
+
+  // دالة إرسال الرسالة إلى Firestore ثم إلى الـ API (لم يتم المساس بها)
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
@@ -40,7 +47,6 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
     });
 
     try {
-      // 1. حفظ رسالة المستخدم في Firestore
       await _firestore
           .collection('chat_sessions')
           .doc(widget.sessionId)
@@ -53,7 +59,6 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
 
       _scrollToBottom();
 
-      // 2. إرسال الطلب إلى Vercel API (مع الذاكرة)
       final response = await http.post(
         Uri.parse(_apiUrl),
         headers: {
@@ -63,7 +68,6 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
         body: jsonEncode({
           'user_message': text,
           'session_id': widget.sessionId,
-          // إرسال الأعراض المتراكمة وآخر عرض سأل عنه السيرفر
           'accumulated_symptoms': _accumulatedSymptoms,
           'last_asked_symptom': _lastAskedSymptom,
         }),
@@ -72,13 +76,11 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
       if (response.statusCode == 200) {
         final decodedResponse = jsonDecode(utf8.decode(response.bodyBytes));
         
-        // --- تحديث الذاكرة المحلية بالبيانات القادمة من السيرفر ---
         setState(() {
           _accumulatedSymptoms = List<String>.from(decodedResponse['accumulated_symptoms'] ?? []);
           _lastAskedSymptom = decodedResponse['last_asked_symptom'];
         });
         
-        // 3. حفظ رد الـ Agent في Firestore
         await _firestore
             .collection('chat_sessions')
             .doc(widget.sessionId)
@@ -106,7 +108,7 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message, style: const TextStyle(color: Colors.white)), backgroundColor: Colors.red),
+      SnackBar(content: Text(message, style: const TextStyle(color: Colors.white)), backgroundColor: Colors.redAccent),
     );
   }
 
@@ -122,188 +124,266 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
     }
   }
 
-  // دالة لبناء بطاقة المرض
+  // دالة لبناء بطاقة المرض بستايل عصري ونظيف
   Widget _buildDiagnosisCard(String? diseaseId) {
     if (diseaseId == null) return const SizedBox.shrink();
 
-    // البحث عن المرض في قائمة infections_data
     final infection = infections_data.firstWhere(
       (inf) => inf.id == diseaseId,
       orElse: () => infections_data[0], 
     );
 
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Colors.blue.shade50,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: primaryBlue.withOpacity(0.08),
+            blurRadius: 15,
+            spreadRadius: 2,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.medical_services, color: Colors.blue, size: 28),
-                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: primaryBlue.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.medical_information_rounded, color: primaryBlue, size: 28),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    infection.name, // سيطبع اسم المرض مثل Dental caries[cite: 2]
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+                    infection.name, 
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkText),
                   ),
                 ),
               ],
             ),
-            const Divider(),
-            Text("Causing Agent: ${infection.causingAgent}", style: const TextStyle(fontWeight: FontWeight.w600)), // طباعة المسبب[cite: 2]
-            const SizedBox(height: 8),
-            Text("Symptoms: ${infection.symptoms.join(', ')}", style: const TextStyle(color: Colors.black87)), // طباعة الأعراض[cite: 2]
-            const SizedBox(height: 8),
-            const Text("Treatment:", style: TextStyle(fontWeight: FontWeight.w600)),
-            Text(infection.treatment, style: const TextStyle(color: Colors.black87)), // طباعة العلاج[cite: 2]
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12.0),
+              child: Divider(color: Color(0xFFE0E5EC), thickness: 1.5),
+            ),
+            _buildDiagnosisRow("Causing Agent", infection.causingAgent),
+            const SizedBox(height: 12),
+            _buildDiagnosisRow("Symptoms", infection.symptoms.join(', ')),
+            const SizedBox(height: 12),
+            _buildDiagnosisRow("Treatment", infection.treatment),
           ],
         ),
       ),
     );
   }
 
+  // أداة مساعدة لتنسيق نصوص بطاقة التشخيص
+  Widget _buildDiagnosisRow(String title, String content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title, 
+          style: TextStyle(fontWeight: FontWeight.bold, color: primaryBlue, fontSize: 14),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          content, 
+          style: const TextStyle(color: Colors.black87, fontSize: 15, height: 1.4),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text('Beta Chat - Medical Agent'),
-        backgroundColor: Colors.teal,
+        backgroundColor: bgColor,
+        elevation: 0, // إزالة الظل السفلي للشريط
+        iconTheme: IconThemeData(color: darkText),
+        title: Text(
+          'AI Medical Assistant',
+          style: TextStyle(color: darkText, fontWeight: FontWeight.bold, fontSize: 20),
+        ),
         actions: [
           Container(
             margin: const EdgeInsets.all(10),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
-              color: Colors.redAccent,
+              color: primaryBlue.withOpacity(0.15),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Center(child: Text('BETA', style: TextStyle(fontWeight: FontWeight.bold))),
+            child: Center(
+              child: Text(
+                'BETA', 
+                style: TextStyle(fontWeight: FontWeight.bold, color: primaryBlue, fontSize: 12),
+              ),
+            ),
           )
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore
-                  .collection('chat_sessions')
-                  .doc(widget.sessionId)
-                  .collection('messages')
-                  .orderBy('timestamp')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestore
+                    .collection('chat_sessions')
+                    .doc(widget.sessionId)
+                    .collection('messages')
+                    .orderBy('timestamp')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+                    return Center(child: CircularProgressIndicator(color: primaryBlue));
+                  }
 
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(
-                    child: Text('Start describing your symptoms...', style: TextStyle(color: Colors.grey, fontSize: 16)),
-                  );
-                }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.chat_bubble_outline_rounded, size: 60, color: Colors.grey.shade400),
+                          const SizedBox(height: 16),
+                          Text('Start describing your symptoms...', style: TextStyle(color: Colors.grey.shade600, fontSize: 16)),
+                        ],
+                      ),
+                    );
+                  }
 
-                var messages = snapshot.data!.docs;
-                
-                // تمرير الشاشة للأسفل عند وصول بيانات جديدة
-                WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+                  var messages = snapshot.data!.docs;
+                  WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(8),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    var msg = messages[index].data() as Map<String, dynamic>;
-                    bool isUser = msg['sender'] == 'user';
-                    String text = msg['text'] ?? '';
-                    String? action = msg['action'];
-                    String? diseaseId = msg['disease_id'];
+                  return ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      var msg = messages[index].data() as Map<String, dynamic>;
+                      bool isUser = msg['sender'] == 'user';
+                      String text = msg['text'] ?? '';
+                      String? action = msg['action'];
+                      String? diseaseId = msg['disease_id'];
 
-                    return Column(
-                      crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: isUser ? Colors.teal.shade100 : Colors.grey.shade200,
-                            borderRadius: BorderRadius.only(
-                              topLeft: const Radius.circular(16),
-                              topRight: const Radius.circular(16),
-                              bottomLeft: Radius.circular(isUser ? 16 : 0),
-                              bottomRight: Radius.circular(isUser ? 0 : 16),
+                      return Column(
+                        crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                            decoration: BoxDecoration(
+                              color: isUser ? primaryBlue : Colors.white,
+                              boxShadow: isUser ? [] : [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                )
+                              ],
+                              borderRadius: BorderRadius.only(
+                                topLeft: const Radius.circular(20),
+                                topRight: const Radius.circular(20),
+                                bottomLeft: Radius.circular(isUser ? 20 : 4),
+                                bottomRight: Radius.circular(isUser ? 4 : 20),
+                              ),
+                            ),
+                            child: Text(
+                              text, 
+                              style: TextStyle(
+                                fontSize: 16, 
+                                height: 1.4,
+                                color: isUser ? Colors.white : darkText,
+                              ),
                             ),
                           ),
-                          child: Text(text, style: const TextStyle(fontSize: 16)),
-                        ),
-                        
-                        // عرض بطاقة التشخيص إذا كان القرار نهائياً
-                        if (!isUser && action == 'diagnose') _buildDiagnosisCard(diseaseId),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          
-          // عرض مؤشر التحميل أثناء انتظار رد الخادم
-          if (_isTyping)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                children: [
-                  SizedBox(width: 16),
-                  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-                  SizedBox(width: 8),
-                  Text("Agent is typing...", style: TextStyle(color: Colors.grey)),
-                ],
+                          
+                          if (!isUser && action == 'diagnose') _buildDiagnosisCard(diseaseId),
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
             ),
             
-          // حقل إدخال النص
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(color: Colors.grey.shade300, blurRadius: 4, offset: const Offset(0, -2))
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _sendMessage(),
-                    decoration: InputDecoration(
-                      hintText: 'Type your symptoms here...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
+            // مؤشر الكتابة العصري
+            if (_isTyping)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
+                child: Row(
+                  children: [
+                    SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: primaryBlue)),
+                    const SizedBox(width: 12),
+                    Text("AI is analyzing...", style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500)),
+                  ],
+                ),
+              ),
+              
+            // منطقة الإدخال النظيفة
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03), 
+                    blurRadius: 15, 
+                    offset: const Offset(0, -5),
+                  )
+                ],
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (_) => _sendMessage(),
+                      style: TextStyle(color: darkText),
+                      decoration: InputDecoration(
+                        hintText: 'Type your symptoms...',
+                        hintStyle: TextStyle(color: Colors.grey.shade400),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: bgColor,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                       ),
-                      filled: true,
-                      fillColor: Colors.grey.shade100,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                CircleAvatar(
-                  backgroundColor: _isTyping ? Colors.grey : Colors.teal,
-                  child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: _isTyping ? null : _sendMessage,
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: _isTyping ? null : _sendMessage,
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: _isTyping ? Colors.grey.shade300 : primaryBlue,
+                        shape: BoxShape.circle,
+                        boxShadow: _isTyping ? [] : [
+                          BoxShadow(color: primaryBlue.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
+                        ]
+                      ),
+                      child: const Icon(Icons.send_rounded, color: Colors.white, size: 24),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
