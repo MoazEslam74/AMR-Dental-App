@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:eda_pharma/data/infection_data.dart';
+import 'package:eda_pharma/screens/webView_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:eda_pharma/model/infection.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BetaChatScreen extends StatefulWidget {
   final String sessionId;
@@ -169,6 +171,34 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkText),
                   ),
                 ),
+                const SizedBox(width: 12,),
+                IconButton(
+                              onPressed: () async {
+                                final query = Uri.encodeComponent(infection.name);
+                                final url = 'https://www.google.com/search?tbm=isch&q=$query';
+                                if (Theme.of(context).platform == TargetPlatform.android) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => WebViewScreen(url: url),
+                                    ),
+                                  );
+                                } else {
+                                  if (await canLaunchUrl(Uri.parse(url))) {
+                                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                                  }
+                                }
+                              },
+                              icon: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(Icons.image_search, color: primaryBlue, size: 24),
+                              ),
+                              tooltip: 'View Images',
+                            ),                
               ],
             ),
             const Padding(

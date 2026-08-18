@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-class AntibioticWebViewScreen extends StatefulWidget {
+class WebViewScreen extends StatefulWidget {
   final String url;
-  const AntibioticWebViewScreen({super.key, required this.url});
+  const WebViewScreen({super.key, required this.url});
 
   @override
-  State<AntibioticWebViewScreen> createState() =>
-      _AntibioticWebViewScreenState();
+  State<WebViewScreen> createState() =>
+      _WebViewScreenState();
 }
 
-class _AntibioticWebViewScreenState extends State<AntibioticWebViewScreen> {
+class _WebViewScreenState extends State<WebViewScreen> {
   late final WebViewController _controller;
 
   @override

@@ -225,7 +225,7 @@ class _InfectionSearchScreenState extends State<InfectionSearchScreen> {
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) =>
-                                                      AntibioticWebViewScreen(
+                                                      WebViewScreen(
                                                         url: url,
                                                       ),
                                                 ),
