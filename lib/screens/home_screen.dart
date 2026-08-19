@@ -140,38 +140,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   children: [
                     // الـ FeatureWidgets محفوظة بالكامل بدون تعديل في الـ Routes
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [FeatureWidget(
+                    Badge(
+                      
+                      label: const Text('Beta', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      backgroundColor: Colors.redAccent,
+                      offset: Offset(-30, 10),
+                      child: FeatureWidget(
                         featureColor: Colors.blue.shade600,
                         featureName: "Medical diagnosis with AI",
                         featureIcon: Icons.chat_rounded,
                         routeName: '/beta_chat',
                       ),
-                      Positioned(
-      top: -10, // رفع العلامة للأعلى لتبرز خارج الزر
-      right: -10, // سحب العلامة لليمين
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.redAccent, // لون أحمر أو برتقالي للفت الانتباه
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.redAccent.withOpacity(0.4),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            )
-          ],
-        ),child: const Text(
-          'NEW',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1, // توسيع المسافة بين الحروف لشكل عصري
-          ),
-        ),),)]
                     ),
                     FeatureWidget(
                       featureColor: Colors.amber.shade700,
