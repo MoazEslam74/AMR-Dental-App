@@ -21,24 +21,20 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instanceFor(
     app: Firebase.app(),
-    databaseId: 'default', // هنا نجبر التطبيق على البحث عن الاسم بدون أقواس
+    databaseId: 'default',
   );
   final ScrollController _scrollController = ScrollController();
-  bool _isTyping = false; // لإظهار مؤشر التحميل أثناء انتظار الـ API
+  bool _isTyping = false;
 
-  // رابط Vercel الخاص بك
   final String _apiUrl = 'https://medical-diagnostic-agent-two.vercel.app/chat';
   
-  // --- المتغيرات الجديدة لحفظ ذاكرة المحادثة (ملف المريض) ---
   List<String> _accumulatedSymptoms = [];
   String? _lastAskedSymptom;
   
-  // الألوان الأساسية للتصميم الجديد
   final Color bgColor = const Color(0xFFF4F7FC);
   final Color primaryBlue = const Color(0xFF1976D2);
   final Color darkText = const Color(0xFF102A43);
 
-  // دالة إرسال الرسالة إلى Firestore ثم إلى الـ API (لم يتم المساس بها)
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
@@ -108,6 +104,37 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
     }
   }
 
+  // --- الدالة الجديدة: مسح المحادثة بالكامل وبدء واحدة جديدة ---
+  Future<void> _startNewChat() async {
+    setState(() {
+      _isTyping = true;
+    });
+    
+    try {
+      // 1. تصفير الذاكرة المحلية (المتغيرات)
+      _accumulatedSymptoms.clear();
+      _lastAskedSymptom = null;
+
+      // 2. مسح جميع الرسائل من قاعدة البيانات Firestore
+      final messagesRef = _firestore
+          .collection('chat_sessions')
+          .doc(widget.sessionId)
+          .collection('messages');
+          
+      final snapshots = await messagesRef.get();
+      for (var doc in snapshots.docs) {
+        await doc.reference.delete();
+      }
+    } catch (e) {
+      _showError('Failed to clear chat: $e');
+    } finally {
+      setState(() {
+        _isTyping = false;
+      });
+    }
+  }
+  // -------------------------------------------------------------
+
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message, style: const TextStyle(color: Colors.white)), backgroundColor: Colors.redAccent),
@@ -126,7 +153,6 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
     }
   }
 
-  // دالة لبناء بطاقة المرض بستايل عصري ونظيف
   Widget _buildDiagnosisCard(String? diseaseId) {
     if (diseaseId == null) return const SizedBox.shrink();
 
@@ -171,34 +197,34 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkText),
                   ),
                 ),
-                const SizedBox(width: 12,),
+                const SizedBox(width: 12),
                 IconButton(
-                              onPressed: () async {
-                                final query = Uri.encodeComponent(infection.name);
-                                final url = 'https://www.google.com/search?tbm=isch&q=$query';
-                                if (Theme.of(context).platform == TargetPlatform.android) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => WebViewScreen(url: url),
-                                    ),
-                                  );
-                                } else {
-                                  if (await canLaunchUrl(Uri.parse(url))) {
-                                    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                                  }
-                                }
-                              },
-                              icon: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade100,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(Icons.image_search, color: primaryBlue, size: 24),
-                              ),
-                              tooltip: 'View Images',
-                            ),                
+                  onPressed: () async {
+                    final query = Uri.encodeComponent(infection.name);
+                    final url = 'https://www.google.com/search?tbm=isch&q=$query';
+                    if (Theme.of(context).platform == TargetPlatform.android) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WebViewScreen(url: url),
+                        ),
+                      );
+                    } else {
+                      if (await canLaunchUrl(Uri.parse(url))) {
+                        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                      }
+                    }
+                  },
+                  icon: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(Icons.image_search, color: primaryBlue, size: 24),
+                  ),
+                  tooltip: 'View Images',
+                ),                
               ],
             ),
             const Padding(
@@ -216,7 +242,6 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
     );
   }
 
-  // أداة مساعدة لتنسيق نصوص بطاقة التشخيص
   Widget _buildDiagnosisRow(String title, String content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,13 +259,40 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
     );
   }
 
+  // --- زر New Chat بالتصميم العصري ---
+  Widget _buildNewChatButton() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
+      child: Center(
+        child: ElevatedButton.icon(
+          onPressed: _startNewChat,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: primaryBlue,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            elevation: 4,
+            shadowColor: primaryBlue.withOpacity(0.4),
+          ),
+          icon: const Icon(Icons.refresh_rounded, size: 22),
+          label: const Text(
+            'Start New Diagnosis',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: bgColor,
-        elevation: 0, // إزالة الظل السفلي للشريط
+        elevation: 0, 
         iconTheme: IconThemeData(color: darkText),
         title: Text(
           'AI Medical Assistant',
@@ -305,6 +357,9 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
                       String text = msg['text'] ?? '';
                       String? action = msg['action'];
                       String? diseaseId = msg['disease_id'];
+                      
+                      // متغير للتحقق مما إذا كانت هذه هي الرسالة الأخيرة في القائمة
+                      bool isLastMessage = index == messages.length - 1;
 
                       return Column(
                         crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -338,7 +393,12 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
                             ),
                           ),
                           
+                          // عرض بطاقة التشخيص
                           if (!isUser && action == 'diagnose') _buildDiagnosisCard(diseaseId),
+                          
+                          // إظهار زر "بدء تشخيص جديد" فقط بعد بطاقة التشخيص الأخيرة
+                          if (isLastMessage && !isUser && action == 'diagnose') 
+                            _buildNewChatButton(),
                         ],
                       );
                     },
@@ -347,7 +407,6 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
               ),
             ),
             
-            // مؤشر الكتابة العصري
             if (_isTyping)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 20),
@@ -360,7 +419,6 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
                 ),
               ),
               
-            // منطقة الإدخال النظيفة
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
