@@ -331,35 +331,66 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
                     return Center(child: CircularProgressIndicator(color: primaryBlue));
                   }
 
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.chat_bubble_outline_rounded, size: 60, color: Colors.grey.shade400),
-                          const SizedBox(height: 16),
-                          Text('Start describing your symptoms...', style: TextStyle(color: Colors.grey.shade600, fontSize: 16)),
-                        ],
-                      ),
-                    );
-                  }
-
-                  var messages = snapshot.data!.docs;
+                  // نجلب الرسائل إن وجدت، وإلا نعتبرها قائمة فارغة
+                  var messages = snapshot.hasData ? snapshot.data!.docs : [];
+                  
                   WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
                   return ListView.builder(
                     controller: _scrollController,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                    itemCount: messages.length,
+                    // نزود العدد بمقدار 1 لحساب الرسالة الترحيبية الثابتة
+                    itemCount: messages.length + 1, 
                     itemBuilder: (context, index) {
-                      var msg = messages[index].data() as Map<String, dynamic>;
+                      
+                      // 1. طبع الرسالة الترحيبية الثابتة في أعلى الشاشة دائماً
+                      if (index == 0) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.04),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  )
+                                ],
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(20),
+                                  topRight: Radius.circular(20),
+                                  bottomLeft: Radius.circular(4), // شكل فقاعة الذكاء الاصطناعي
+                                  bottomRight: Radius.circular(20),
+                                ),
+                              ),
+                              child: Text(
+                                "Hi, How can I help you today?", 
+                                style: TextStyle(
+                                  fontSize: 16, 
+                                  height: 1.4,
+                                  color: darkText,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+
+                      // 2. طبع باقي الرسائل القادمة من قاعدة البيانات
+                      // نطرح 1 من الـ index لتعويض الرسالة الترحيبية
+                      int actualIndex = index - 1;
+                      var msg = messages[actualIndex].data() as Map<String, dynamic>;
                       bool isUser = msg['sender'] == 'user';
                       String text = msg['text'] ?? '';
                       String? action = msg['action'];
                       String? diseaseId = msg['disease_id'];
                       
-                      // متغير للتحقق مما إذا كانت هذه هي الرسالة الأخيرة في القائمة
-                      bool isLastMessage = index == messages.length - 1;
+                      // التحقق مما إذا كانت هذه هي الرسالة الأخيرة
+                      bool isLastMessage = actualIndex == messages.length - 1;
 
                       return Column(
                         crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -393,10 +424,8 @@ class _BetaChatScreenState extends State<BetaChatScreen> {
                             ),
                           ),
                           
-                          // عرض بطاقة التشخيص
                           if (!isUser && action == 'diagnose') _buildDiagnosisCard(diseaseId),
                           
-                          // إظهار زر "بدء تشخيص جديد" فقط بعد بطاقة التشخيص الأخيرة
                           if (isLastMessage && !isUser && action == 'diagnose') 
                             _buildNewChatButton(),
                         ],
