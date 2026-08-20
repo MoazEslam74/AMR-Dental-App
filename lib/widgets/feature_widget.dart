@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:eda_pharma/screens/about_us.dart';
 import 'package:flutter/material.dart';
