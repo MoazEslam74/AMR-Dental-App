@@ -17,9 +17,9 @@ The application is tailored for dental and oral health professionals to support 
 
 > From the real App.
 
-| Symptom Search | Condition Details | Antibiotic Hub |
-| :---: | :---: | :---: |
-| <img src="link_to_image_1.jpg" width="200"/> | <img src="link_to_image_2.jpg" width="200"/> | <img src="link_to_image_3.jpg" width="200"/> |
+| Symptom Search | Antibiotic Hub |
+| :---: | :---: |
+| <img src="Screenshot 2026-08-20 092450.png" width="200"/> | <img src="Screenshot 2026-08-20 120706.png" width="200"/> |
 
 ## 🛠️ Tech Stack & Architecture
 
